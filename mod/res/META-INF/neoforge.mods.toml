@@ -5,16 +5,19 @@ issueTrackerURL = ""
 
 [[mods]]
 modId = "freerot"
-version = "0.1.0"
+version = "0.2.0"
 displayName = "FreeRot"
 displayTest = "IGNORE_ALL_VERSION"
 authors = "built for a 1.21.1 backport of Weskerson's 3D Items"
 description = '''
 Client-side support for resource packs written against the 1.21.4+ item model system.
 
-Adds a model loader that accepts element rotations of any angle around any combination of
-axes, and item model properties for use-key-held, is-enchanted, in-use and use-ticks-left,
-so packs can drive model swaps that 1.21.1 has no property for.
+Reads the 1.21.4+ item model system (assets/<namespace>/items/) that 1.21.1 does not have,
+and draws element rotations 1.21.1 refuses to parse - any angle, around any combination of
+axes. Install a modern pack as-is and it works.
+
+Also registers item model properties for use-key-held, is-enchanted, in-use and
+use-ticks-left, and keeps the freerot:mesh loader for packs converted ahead of time.
 
 Does nothing on its own - a resource pack has to ask for it.
 '''

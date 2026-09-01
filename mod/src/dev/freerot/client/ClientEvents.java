@@ -1,6 +1,7 @@
 package dev.freerot.client;
 
 import dev.freerot.FreeRot;
+import dev.freerot.client.item.DefinitionInstaller;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
@@ -20,6 +21,13 @@ public final class ClientEvents {
     @SubscribeEvent
     public static void registerGeometryLoaders(ModelEvent.RegisterGeometryLoaders event) {
         event.register(id("mesh"), MeshLoader.INSTANCE);
+    }
+
+    @SubscribeEvent
+    public static void modifyBakingResult(ModelEvent.ModifyBakingResult event) {
+        // Packs written for 1.21.4+ put their item models in assets/<ns>/items/, a layer
+        // 1.21.1 does not read. Nothing else will pick them up, so they are applied here.
+        DefinitionInstaller.install(event.getModels(), event.getTextureGetter());
     }
 
     @SubscribeEvent

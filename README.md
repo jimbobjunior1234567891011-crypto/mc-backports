@@ -39,25 +39,21 @@ Converted packs are **not** distributed here — they're someone else's art. The
 
 ## Downloading
 
-Two pieces. The mod is here; the pack you convert yourself, in one step.
+**Install the pack, install the mod, done.** No conversion step.
 
-**1. The mod** — grab `freerot-0.1.0.jar` from [Releases](https://github.com/jimbobjunior1234567891011-crypto/mc-backports/releases) and drop it in your instance's `mods` folder. NeoForge 1.21.1, client-side only, the server needs nothing.
+1. Download the pack from its own page — for example [Weskerson's 3D Items](https://modrinth.com/resourcepack/tools-and-utils) — and put the zip in your instance's `resourcepacks` folder, exactly as downloaded.
+2. Download `freerot-0.2.0.jar` from [Releases](https://github.com/jimbobjunior1234567891011-crypto/mc-backports/releases) and put it in `mods`.
+3. Enable the pack in Options → Resource Packs.
 
-**2. The pack** — download the pack from its own page (for example [Weskerson's 3D Items](https://modrinth.com/resourcepack/tools-and-utils)), then:
+NeoForge 1.21.1. The mod is client-side, so the server needs nothing and your friends don't have to match — without it they just see normal items.
 
-- download this repo (green **Code** button, **Download ZIP**) and unzip it
-- right-click `convert.ps1` → **Run with PowerShell**
-- drag the pack's `.zip` into the window, press Enter
+The mod reads the pack's `assets/<namespace>/items/` definitions itself and draws the geometry 1.21.1 rejects. Items the version doesn't have are left alone.
 
-It finds your Minecraft jar on its own, converts, checks the result, and leaves a
-`<pack>-1.21.1-backport.zip` next to the original. Put that in `resourcepacks` and enable
-it. You need Python 3 installed for this step.
+### The offline converter (optional)
 
-**Why isn't the converted pack just here for download?** Because it isn't mine to hand out.
-Weskerson's terms say the pack can't be redistributed and modified versions can't be shared
-publicly — a converted pack is a modified version. Converting your own copy is fine, and so
-is bundling it into a modpack or server you run with friends. Every pack has its own terms,
-so check before you pass one around.
+There's also a converter that rewrites a pack ahead of time, which is useful if you want a pack that works with **no mod at all** — fewer items and no animated states, but nothing extra to install. Download this repo, right-click `convert.ps1` → Run with PowerShell, drag the pack zip in. Needs Python 3.
+
+Converted packs aren't hosted here: Weskerson's terms say the pack can't be redistributed and modified versions can't be shared publicly. Converting your own copy is fine, and so is bundling it into a modpack or server you run with friends. Every pack has its own terms — check before passing one around.
 
 ## Request a backport
 
@@ -164,7 +160,12 @@ powershell -ExecutionPolicy Bypass -File mod\build.ps1
 
 ## Status
 
-In use and working in game on a 1.21.1 NeoForge Create pack.
+The converter path is in use and working in game on a 1.21.1 NeoForge Create pack.
+
+**Reading packs live (0.2.0) is new and lightly tested.** It does at runtime what the
+converter does offline, so the same geometry and definition logic applies, but it has had
+far fewer hours in front of it. If something looks wrong, the converter route is the
+proven one.
 
 Two bugs only a launch could find, both fixed and both now covered by the validator or the code:
 
