@@ -1,0 +1,4 @@
+# built artifacts, regenerate with mod/build.ps1 and converter/backport.py
+dist/
+mod/build/
+__pycache__/

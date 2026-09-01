@@ -1,0 +1,34 @@
+modLoader = "javafml"
+loaderVersion = "[4,)"
+license = "MIT"
+issueTrackerURL = ""
+
+[[mods]]
+modId = "freerot"
+version = "0.1.0"
+displayName = "FreeRot"
+displayTest = "IGNORE_ALL_VERSION"
+authors = "built for a 1.21.1 backport of Weskerson's 3D Items"
+description = '''
+Client-side support for resource packs written against the 1.21.4+ item model system.
+
+Adds a model loader that accepts element rotations of any angle around any combination of
+axes, and item model properties for use-key-held, is-enchanted, in-use and use-ticks-left,
+so packs can drive model swaps that 1.21.1 has no property for.
+
+Does nothing on its own - a resource pack has to ask for it.
+'''
+
+[[dependencies.freerot]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "CLIENT"
+
+[[dependencies.freerot]]
+modId = "minecraft"
+type = "required"
+versionRange = "[1.21.1,1.22)"
+ordering = "NONE"
+side = "CLIENT"
