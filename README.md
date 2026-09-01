@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.png" alt="MC Backports" width="560">
+  <img src="docs/logo.png" alt="MC Backports" width="620">
 </p>
 
 <p align="center">
@@ -142,5 +142,7 @@ Static validation caught neither. It now checks for reference cycles, but the le
 - A state change swaps the whole model, so an item mid-eat also shows its chew stage in the inventory slot for those few ticks.
 
 ## Credits
+
+The logo was made with EaseCation's [cube-3d-text](https://github.com/EaseCation/cube-3d-text).
 
 Weskerson's 3D Items is by [weskerson](https://modrinth.com/user/weskerson). This repo doesn't include or redistribute it; it converts your own copy. If you share a converted pack, that's the original author's call, not this repo's.
