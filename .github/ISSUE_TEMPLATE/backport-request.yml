@@ -1,0 +1,71 @@
+name: Backport request
+description: Ask for a resource pack to be backported to an older Minecraft version
+title: "[Request] <pack name> -> <target version>"
+labels: ["request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Requests are handled by one person for free, so the more of this you fill in, the
+        more likely it gets done. Packs that only need a `pack_format` bump are usually
+        not worth a request - try that yourself first.
+
+  - type: input
+    id: pack
+    attributes:
+      label: Pack link
+      description: Modrinth, CurseForge or wherever it lives. Please link the pack itself, not a video of it.
+      placeholder: https://modrinth.com/resourcepack/...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Pack version
+      description: Which version of the pack. "Latest" goes stale, a number does not.
+      placeholder: "2.5"
+    validations:
+      required: true
+
+  - type: input
+    id: target
+    attributes:
+      label: Target Minecraft version
+      placeholder: "1.21.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: loader
+    attributes:
+      label: Mod loader
+      description: NeoForge is best supported, because the converter leans on NeoForge-only model features. Fabric and vanilla can only get the reduced build.
+      options:
+        - NeoForge
+        - Fabric
+        - Vanilla (no loader)
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What matters most in this pack
+      description: |
+        The parts you actually care about. A backport is rarely 100%, so knowing what
+        must survive helps. e.g. "the 3D swords", "the animated GUI", "just the block
+        textures".
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: acknowledge
+    attributes:
+      label: Before you post
+      options:
+        - label: I checked the pack does not already publish a build for my version
+          required: true
+        - label: I understand converted packs are not redistributed here, and I will need to run the converter or ask the pack author's permission before sharing the result
+          required: true

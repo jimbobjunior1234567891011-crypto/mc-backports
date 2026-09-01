@@ -1,24 +1,39 @@
-# FreeRot
+<p align="center">
+  <img src="docs/logo.png" alt="MC Backports" width="560">
+</p>
 
-Backports resource packs written for the **1.21.4+ item model system** to **Minecraft 1.21.1 + NeoForge**, including the geometry and the animated item states that 1.21.1 has no way to express.
-
-Built for [Weskerson's 3D Items](https://modrinth.com/resourcepack/tools-and-utils) 2.5, but the converter is generic — it reads any pack that uses `assets/minecraft/items/`.
-
-| | items covered |
-|---|---|
-| Weskerson's 3D Items 2.5 on stock 1.21.1 | 0 |
-| converted, no mod | 223 |
-| converted, with the FreeRot mod | **336** of 338 possible |
+<p align="center">
+  Resource packs written for new Minecraft versions, made to run on old ones.<br>
+  <a href="https://github.com/jimbobjunior1234567891011-crypto/mc-backports/issues/new?template=backport-request.yml"><b>Request a backport</b></a>
+</p>
 
 ---
 
-## Why the packs break
+Modern resource packs stop working on older versions for reasons that have nothing to do with the textures. The item model system was rewritten in 1.21.4, and the rules for model geometry loosened again in 1.21.6 and 1.21.11. A pack built against any of that doesn't degrade gracefully on 1.21.1 — it does nothing at all, or it refuses to load.
 
-Two independent problems, and most "just change pack_format" advice fixes neither.
+This repo backports them anyway: a converter that rewrites the pack, and a small client mod that draws the parts the old version genuinely cannot.
 
-**1. The item definition layer.** Since 1.21.4 an item's model is chosen by a JSON file in `assets/minecraft/items/`, which can branch on display context, item components, and use state. 1.21.1 does not read that directory at all — it maps item id straight to `models/item/<id>.json`. Every item silently stays vanilla.
+## Backports
 
-**2. The geometry.** Element rotation rules loosened twice after 1.21.1:
+| pack | from | to | coverage |
+|---|---|---|---|
+| [Weskerson's 3D Items](https://modrinth.com/resourcepack/tools-and-utils) 2.5 | 1.21.4+ | 1.21.1 NeoForge | **336 / 338** items, eating frames, use-key poses, compass and clock |
+
+Converted packs are **not** distributed here — they're someone else's art. The converter runs against your own copy of the pack.
+
+## Request a backport
+
+[Open a request.](https://github.com/jimbobjunior1234567891011-crypto/mc-backports/issues/new?template=backport-request.yml) Say which pack, which version, and which parts matter most to you. NeoForge targets get the best results, because the converter leans on model features only NeoForge has.
+
+Some things can't be backported at all, and the issue will say so plainly rather than going quiet — an item that doesn't exist in the target version has nothing to render.
+
+## Why packs break
+
+Two independent problems, and most "just change the pack_format" advice fixes neither.
+
+**1. The item definition layer.** Since 1.21.4 an item's model is chosen by a JSON file in `assets/minecraft/items/` that can branch on display context, item components and use state. Older versions don't read that directory — they map item id straight to `models/item/<id>.json`. Every item silently stays vanilla.
+
+**2. The geometry.** Element rotation rules loosened twice:
 
 | | multiple axes at once | angles off the 22.5° grid |
 |---|---|---|
@@ -28,23 +43,23 @@ Two independent problems, and most "just change pack_format" advice fixes neithe
 
 Weskerson's 2.5 uses 1473 multi-axis elements and 924 free-angle ones. 1.21.1 rejects those models outright — not a visual glitch, a load failure.
 
-## How it is fixed
+## How the conversion works
 
 **Item definitions → plain models.** Each definition is flattened into `models/item/<id>.json`.
 
-**2D in the inventory, 3D in the hand** survives via NeoForge's `neoforge:separate_transforms`: the `gui`/`ground`/`fixed` perspectives get the vanilla 1.21.1 model (inlined, so it cannot recurse into the file that replaced it), the hand perspectives get the pack's 3D models. `gui_light` is forced to `front` wherever the inventory shows a flat sprite, or it renders with block shading.
+**2D in the inventory, 3D in the hand** survives via NeoForge's `neoforge:separate_transforms`: the `gui`/`ground`/`fixed` perspectives get the vanilla model, the hand perspectives get the pack's 3D models.
 
 **Geometry, three tiers:**
 
 | tier | what happens | models |
 |---|---|---|
 | legal as-is | copied unchanged | 467 |
-| rotation is 90/180/270 plus a legal remainder | the right-angle part is applied to the box's own coordinates, the remainder stays in the rotation field. Faces, cullfaces and texture orientation move with it | 26 |
+| rotation is 90/180/270 plus a legal remainder | the right-angle part is applied to the box's own coordinates, the remainder stays in the rotation field | 26 |
 | anything else | emitted as a `freerot:mesh` quad soup with the rotation already applied — needs the mod | 393 |
 
 The right-angle bake is exact, and proven so: every rewritten face is compared against the textured quad the original element produced, and a model is only rewritten when all of them match.
 
-**Item states → overrides.** States 1.21.1 has no property for are rebuilt as ordinary `overrides` driven by properties the mod registers — one generated model per reachable state, ordered so Minecraft's "last matching override wins" picks the right one.
+**Item states → overrides.** States the old version has no property for are rebuilt as ordinary `overrides` driven by properties the mod registers — one generated model per reachable state, ordered so Minecraft's "last matching override wins" picks the right one.
 
 | pack asks for | 1.21.1 gets |
 |---|---|
@@ -54,16 +69,16 @@ The right-angle bake is exact, and proven so: every rewritten face is compared a
 | `minecraft:fishing_rod/cast` | vanilla `cast` |
 | `minecraft:compass` / `minecraft:time` | vanilla `angle` / `time`, rescaled from the dispatch's own `scale` |
 
-## The mod
+## FreeRot, the mod
 
-`freerot` is a client-only NeoForge 21.1.x mod, about 200 lines. It has no config, no commands and no registry objects; without a pack asking for it, it does nothing.
+Client-only, NeoForge 21.1.x, about 200 lines. No config, no commands, no registry objects. Without a pack asking for it, it does nothing.
 
-- **`freerot:mesh` model loader** — takes pre-transformed quads (positions in model space, uvs in texture space) and bakes them. Because the converter applies rotations up front, the game never sees a rotation it would refuse.
+- **`freerot:mesh` model loader** — takes pre-transformed quads and bakes them. The converter applies rotations up front, so the game never sees a rotation it would refuse.
 - **four item properties** — `freerot:use_key`, `freerot:using`, `freerot:use_ticks`, `freerot:enchanted`.
 
 ### Getting the rotation math right
 
-The mesh converter reproduces the game's own transform rather than approximating it:
+The converter reproduces the game's own transform rather than approximating it:
 
 - single axis → `Matrix4f.rotation(angle, axis)`
 - several axes → `Matrix4f.rotationZYX(z, y, x)`, i.e. **X first, then Y, then Z**
@@ -75,16 +90,16 @@ That composition order was read out of the 1.21.11 client jar (`hqd$a`), not gue
 
 ```
 converter/
-  backport.py        pack -> 1.21.1 pack, mode "plain" or "mod"
+  backport.py        pack -> old-version pack, mode "plain" or "mod"
   bake.py            right-angle bake + the FaceBakery-equivalent quad mapping
   mesh.py            arbitrary rotations -> freerot:mesh quad soup
-  fix_hotbar.py      unrelated: repairs an out-of-range animation frame list
+  fix_hotbar.py      repairs an out-of-range animation frame list
   tests/
     test_bake.py     baked models must emit the original's quads
     test_mesh.py     mesh output cross-checked against the verified mapping
-    validate.py      references, rotation legality, loader shapes, pack_format
+    validate.py      references, cycles, rotation legality, loader shapes
 mod/
-  src/               the mod
+  src/               FreeRot
   build.ps1          javac + jar, no Gradle
 tools/               analysis: angle census, per-item blockers, bake feasibility
 ```
@@ -96,14 +111,14 @@ python converter/backport.py <unpacked-pack> <out-dir> <path-to-1.21.1.jar> mod
 python converter/tests/validate.py <out-dir> <path-to-1.21.1.jar>
 ```
 
-Use `plain` instead of `mod` for the build that needs no mod. Both tests are worth running after any change to `bake.py` or `mesh.py`:
+Use `plain` instead of `mod` for a build that needs no mod (fewer items, no animated states). Run both tests after any change to `bake.py` or `mesh.py`:
 
 ```bash
 python converter/tests/test_bake.py <unpacked-pack>
 python converter/tests/test_mesh.py <unpacked-pack>
 ```
 
-Building the mod (needs a NeoForge install to compile against — it uses the jars already on disk):
+Building the mod — it compiles against the jars a NeoForge install already has, so there's no Gradle and nothing to download:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File mod\build.ps1
@@ -111,12 +126,21 @@ powershell -ExecutionPolicy Bypass -File mod\build.ps1
 
 ## Status
 
-Static verification is thorough: 0 reference or rotation errors across 1579 models, 26/26 baked models quad-identical to their originals, 653 models cross-checked between the two independent geometry paths with 0 mismatches.
+In use and working in game on a 1.21.1 NeoForge Create pack.
 
-Nothing has been rendered in game yet. The untested surfaces, most to least likely to bite: the mod's quad upload path (normals and winding), texture orientation on the 226 multi-axis models, and particle sprite fallback on models that declare no `particle`.
+Two bugs only a launch could find, both fixed and both now covered by the validator or the code:
+
+- Inlining vanilla's override chain reproduced its self-referencing first entry (`item/compass` → `item/compass`), which recursed until the resource reload died with a `StackOverflowError` — and Minecraft's response to a failed reload is to disable *every* enabled pack, which makes it look like a broken zip.
+- A sparse culled-face map handed `ItemRenderer` a null quad list, because `SimpleBakedModel.getQuads` does a bare `culledFaces.get(side)` with no fallback. Vanilla's own builder pre-fills all six directions.
+
+Static validation caught neither. It now checks for reference cycles, but the lesson stands: only launching the game exercises the render path.
 
 ## Not covered
 
-- 72 items in the source pack do not exist in 1.21.1 (copper lanterns, harnesses, coloured bundles, nautilus armor, pale oak boats and signs, newer spawn eggs and discs).
-- `crimson_hanging_sign` and `warped_hanging_sign` — version 2.5 references hand models it does not ship.
+- Items that don't exist in the target version (in Weskerson's case 72 of them: copper lanterns, harnesses, coloured bundles, nautilus armor, pale oak boats and signs, newer spawn eggs and discs).
+- Models a pack references but doesn't ship — 2.5 does this for two hanging signs.
 - A state change swaps the whole model, so an item mid-eat also shows its chew stage in the inventory slot for those few ticks.
+
+## Credits
+
+Weskerson's 3D Items is by [weskerson](https://modrinth.com/user/weskerson). This repo doesn't include or redistribute it; it converts your own copy. If you share a converted pack, that's the original author's call, not this repo's.
