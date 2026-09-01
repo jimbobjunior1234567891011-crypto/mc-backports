@@ -9,6 +9,22 @@
 
 ---
 
+> ### Read this first
+>
+> **This was built with AI.** I'm not a developer. Claude wrote effectively all of the code
+> here, and there are parts of it I don't fully understand. I checked that it works on my
+> setup and my friends' — that's the whole extent of the testing.
+>
+> **So some of it may not work for you.** There are almost certainly bugs nobody has hit
+> yet. If it breaks, delete the two files and you're back to normal — nothing here touches
+> your world or your saves.
+>
+> I'm sharing this because I made it for my own server and it seemed unkind not to. It
+> comes with no warranty and no promise of support. Bug reports are welcome and I'll try,
+> but I can't guarantee I'll understand the answer either.
+
+---
+
 Modern resource packs stop working on older versions for reasons that have nothing to do with the textures. The item model system was rewritten in 1.21.4, and the rules for model geometry loosened again in 1.21.6 and 1.21.11. A pack built against any of that doesn't degrade gracefully on 1.21.1 — it does nothing at all, or it refuses to load.
 
 This repo backports them anyway: a converter that rewrites the pack, and a small client mod that draws the parts the old version genuinely cannot.
@@ -20,6 +36,28 @@ This repo backports them anyway: a converter that rewrites the pack, and a small
 | [Weskerson's 3D Items](https://modrinth.com/resourcepack/tools-and-utils) 2.5 | 1.21.4+ | 1.21.1 NeoForge | **336 / 338** items, eating frames, use-key poses, compass and clock |
 
 Converted packs are **not** distributed here — they're someone else's art. The converter runs against your own copy of the pack.
+
+## Downloading
+
+Two pieces. The mod is here; the pack you convert yourself, in one step.
+
+**1. The mod** — grab `freerot-0.1.0.jar` from [Releases](https://github.com/jimbobjunior1234567891011-crypto/mc-backports/releases) and drop it in your instance's `mods` folder. NeoForge 1.21.1, client-side only, the server needs nothing.
+
+**2. The pack** — download the pack from its own page (for example [Weskerson's 3D Items](https://modrinth.com/resourcepack/tools-and-utils)), then:
+
+- download this repo (green **Code** button, **Download ZIP**) and unzip it
+- right-click `convert.ps1` → **Run with PowerShell**
+- drag the pack's `.zip` into the window, press Enter
+
+It finds your Minecraft jar on its own, converts, checks the result, and leaves a
+`<pack>-1.21.1-backport.zip` next to the original. Put that in `resourcepacks` and enable
+it. You need Python 3 installed for this step.
+
+**Why isn't the converted pack just here for download?** Because it isn't mine to hand out.
+Weskerson's terms say the pack can't be redistributed and modified versions can't be shared
+publicly — a converted pack is a modified version. Converting your own copy is fine, and so
+is bundling it into a modpack or server you run with friends. Every pack has its own terms,
+so check before you pass one around.
 
 ## Request a backport
 
