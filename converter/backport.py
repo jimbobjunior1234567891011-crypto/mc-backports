@@ -231,8 +231,8 @@ for root, dirs, files in os.walk(os.path.join(SRC, "assets")):
             continue
         full = os.path.join(root, fn)
         rel = os.path.relpath(full, SRC).replace(os.sep, "/")
-        if rel.startswith("assets/minecraft/items/") or rel.startswith("assets/minecraft/punchy/"):
-            continue
+        if rel.startswith("assets/minecraft/items/"):
+            continue                               # 1.21.4+ only layer, flattened below
         dst = os.path.join(OUT, rel)
         if rel.startswith("assets/minecraft/models/") and rel.endswith(".json"):
             ref = rel[len("assets/minecraft/models/"):-5]
