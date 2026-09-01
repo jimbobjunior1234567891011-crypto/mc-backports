@@ -44,7 +44,13 @@ public class MeshGeometry implements IUnbakedGeometry<MeshGeometry> {
                            Function<Material, TextureAtlasSprite> spriteGetter,
                            ModelState modelState, ItemOverrides overrides) {
         List<BakedQuad> unculled = new ArrayList<>();
+        // SimpleBakedModel.getQuads does a plain culledFaces.get(side) with no fallback,
+        // so every direction needs an entry or item rendering NPEs on the missing ones.
+        // Vanilla's own Builder pre-fills all six for the same reason.
         Map<Direction, List<BakedQuad>> culled = new EnumMap<>(Direction.class);
+        for (Direction direction : Direction.values()) {
+            culled.put(direction, new ArrayList<>());
+        }
         Transformation transform = modelState.getRotation();
 
         for (Quad quad : quads) {
@@ -53,7 +59,7 @@ public class MeshGeometry implements IUnbakedGeometry<MeshGeometry> {
             Direction cull = quad.cullface();
             if (cull != null) {
                 Direction rotated = Direction.rotate(transform.getMatrix(), cull);
-                culled.computeIfAbsent(rotated, d -> new ArrayList<>()).add(baked);
+                culled.get(rotated).add(baked);
             } else {
                 unculled.add(baked);
             }
