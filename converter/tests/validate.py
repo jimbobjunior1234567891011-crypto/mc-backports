@@ -141,6 +141,38 @@ def check_inline(model, origin, parents):
             errors.append("%s: override points at missing model %s" % (origin, target))
 
 
+def cycle_check(model, origin, path):
+    """Follow parents, separate_transforms sub-models and override targets looking for a
+    loop. Minecraft resolves all three eagerly, so a cycle is a StackOverflowError at
+    reload time, which disables every enabled pack."""
+    parent = model.get("parent")
+    if isinstance(parent, str):
+        ref = parent.replace("minecraft:", "")
+        if ref in path:
+            errors.append("%s: reference cycle via parent %s" % (origin, ref))
+        else:
+            sub = get_model(ref)
+            if sub:
+                cycle_check(sub, origin, path | {ref})
+    for name in ("base",):
+        if isinstance(model.get(name), dict):
+            cycle_check(model[name], origin + "[base]", path)
+    for sub in (model.get("perspectives") or {}).values():
+        if isinstance(sub, dict):
+            cycle_check(sub, origin, path)
+    for override in model.get("overrides", []) or []:
+        target = override.get("model")
+        if not isinstance(target, str):
+            continue
+        ref = target.replace("minecraft:", "")
+        if ref in path:
+            errors.append("%s: reference cycle via override %s" % (origin, ref))
+            continue
+        sub = get_model(ref)
+        if sub:
+            cycle_check(sub, origin, path | {ref})
+
+
 count = 0
 for root, _dirs, files in os.walk(os.path.join(PACK, "assets/minecraft/models")):
     for fn in files:
@@ -155,6 +187,8 @@ for root, _dirs, files in os.walk(os.path.join(PACK, "assets/minecraft/models"))
             continue
         count += 1
         check_inline(model, rel, [])
+        ref = rel[len("assets/minecraft/models/"):-5]
+        cycle_check(model, rel, {ref})
 
 try:
     meta = json.load(open(os.path.join(PACK, "pack.mcmeta"), encoding="utf-8-sig"))

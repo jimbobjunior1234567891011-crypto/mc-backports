@@ -307,12 +307,25 @@ def build_model(per_context, flat):
     return model
 
 
+def inlined(model):
+    """A vanilla model copied into a perspective must lose its own overrides.
+
+    Vanilla clock/compass models start their override chain with an entry pointing at
+    themselves (item/compass -> item/compass). Once this pack replaces that file, an
+    inlined copy of the chain resolves straight back into the model that contains it,
+    and resolveParents recurses until the reload dies with a StackOverflowError. The
+    state overrides this converter writes at the top level replace that chain anyway."""
+    copy = dict(model)
+    copy.pop("overrides", None)
+    return copy
+
+
 def vanilla_flat(item, state, scales):
     """The flat 1.21.1 model for this item in this state.
 
     Clocks and compasses carry their own vanilla override chain (item/clock_37, ...), so
     evaluate it against the state instead of freezing the inventory icon on frame 0."""
-    base = vanilla[item]
+    base = inlined(vanilla[item])
     overrides = base.get("overrides")
     if not overrides or not state:
         return base
@@ -363,7 +376,7 @@ for fn in sorted(os.listdir(items_dir)):
         dropped.append((item, "unparseable definition: %s" % exc))
         continue
     node = definition.get("model")
-    flat = vanilla[item]
+    flat = inlined(vanilla[item])
 
     found, scales = {}, {}
     collect_states(node, found, scales)
